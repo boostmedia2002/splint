@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>סד בועה – מראה אמיתי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#060b18;--panel:#0c1630;--line:#1d2c52;--ink:#e8f6ff;--mute:#8fa6c8;--cy:#39e6ff;--ok:#38e08c;--warn:#ffc04d;--bad:#ff5a6a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(ellipse at 50% 30%,#0f2147 0%,var(--bg) 65%);color:var(--ink);font:16px/1.55 Heebo,system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+header{padding:20px max(4vw,16px) 6px}
+h1{font-size:clamp(26px,4.2vw,40px);line-height:1.05;margin:0 0 6px;font-weight:800;text-wrap:balance}
+header p{margin:0;color:var(--mute);max-width:70ch}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding:12px max(4vw,16px) 32px;max-width:1300px;margin:0 auto}
+@media(min-width:900px){.wrap{grid-template-columns:minmax(0,1fr) 340px}}
+.stage{position:relative;height:min(64vh,620px);min-height:380px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(circle at 50% 80%,rgba(57,230,255,.10),transparent 60%)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.stage.real{background:radial-gradient(circle at 50% 35%,#eef2f5 0%,#c3ccd4 65%,#9aa6b1 100%)}.stage.real::after{display:none}.stage.real .hint{color:#4a5a6e}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(57,230,255,.035) 0 1px,transparent 1px 4px)}
+.hint{position:absolute;bottom:10px;inset-inline:0;text-align:center;font-size:13px;color:var(--mute);pointer-events:none}
+.verdict{position:absolute;top:12px;inset-inline-start:12px;background:rgba(6,11,24,.78);border:1px solid var(--line);border-radius:12px;padding:8px 12px;backdrop-filter:blur(6px)}
+.verdict b{display:block;font-size:24px;line-height:1.1}
+.verdict span{font-size:13px;color:var(--mute)}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+aside h2{font-size:18px;margin:0 0 8px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;margin:10px 0}
+.row label{font-size:15px}
+.row output{font-variant-numeric:tabular-nums;color:var(--cy);font-weight:600;white-space:nowrap}
+input[type=range]{grid-column:1/-1;width:100%;height:32px;accent-color:var(--cy)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+button{font:inherit;font-size:15px;min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid #2b4479;background:#12224a;color:var(--ink);cursor:pointer}
+button[aria-pressed=true]{background:var(--cy);color:#04121f;border-color:var(--cy);font-weight:600}
+button.main{background:var(--ok);color:#03150b;border-color:var(--ok);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+td{padding:6px 0;border-top:1px solid var(--line)}
+td:last-child{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--cy)}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.sep{height:1px;background:var(--line);margin:14px 0}
+@media(prefers-reduced-motion:reduce){.stage::after{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>סד בועה ל-CRPS — מודל במראה אמיתי</h1>
+  <p>פלסטיק שקוף עם חורי אוורור, ריפוד ספוג לבן בחלק התחתון, 2 צירי מתכת בצד אחד ו-2 קליפסים אפורים בצד השני. אפשר לסובב, לפתוח, לשנות מידות ולראות אם יש מגע.</p>
+</header>
+<div class="wrap">
+  <div class="stage real" id="stage">
+    <div class="verdict"><b id="clr">—</b><span id="clrTxt">מרווח מינימלי בין היד לסד</span></div>
+    <div class="hint">גרור לסיבוב · צבוט/גלגלת לזום</div>
+  </div>
+  <aside>
+    <h2>מידות הסד (ס״מ)</h2>
+    <div class="row"><label for="L">גובה הבועה (A עד B)</label><output id="oL"></output><input type="range" id="L" min="15" max="40" step="0.5" value="30"></div>
+    <div class="row"><label for="W">רוחב הבועה במרכז</label><output id="oW"></output><input type="range" id="W" min="8" max="34" step="0.5" value="15"></div>
+    <div class="row"><label for="D">עובי הבועה (גב–כף)</label><output id="oD"></output><input type="range" id="D" min="6" max="34" step="0.5" value="15"></div>
+    <div class="row"><label for="SC">היקף החלק התחתון על האמה</label><output id="oSC"></output><input type="range" id="SC" min="12" max="32" step="0.5" value="17"></div>
+    <div class="row"><label for="WL">רוחב החלק התחתון</label><output id="oWL"></output><input type="range" id="WL" min="4" max="10" step="0.5" value="6.5"></div>
+    <div class="row"><label for="F">אורך החלק התחתון</label><output id="oF"></output><input type="range" id="F" min="5" max="22" step="0.5" value="10"></div>
+    <div class="sep"></div>
+    <h2>היד</h2>
+    <div class="row"><label for="H">אורך כף היד (שורש עד קצה אצבע)</label><output id="oH"></output><input type="range" id="H" min="15" max="22" step="0.5" value="18"></div>
+    <div class="row"><label for="C">כיפוף אצבעות</label><output id="oC"></output><input type="range" id="C" min="0" max="60" step="1" value="20"></div>
+    <div class="btns">
+      <button class="main" id="fit">התאם אוטומטית (2 ס״מ מרווח)</button>
+      <button id="open" aria-pressed="false">פתח מכסה</button>
+      <button id="hand" aria-pressed="true">הצג יד</button>
+      <button id="spin" aria-pressed="true">סיבוב</button>
+      <button id="mode" aria-pressed="false">מצב הולוגרמה</button>
+      <button id="copy">העתק מידות</button>
+    </div>
+    <table><tbody id="spec"></tbody></table>
+    <p class="note">לפי המידות: גובה 30, רוחב הבועה במרכז 15, חלק תחתון ברוחב 6.5 והיקף 17 (לכן הוא שטוח, כמו האמה). הסד בנוי משני חלקים שנפתחים כמו קפסולה: 2 צירי מתכת בצד אחד ו-2 קליפסים בצד השני (במצב הולוגרמה: צירים בכתום, קליפסים בירוק). העובי ואורך החלק התחתון לא היו בשרטוט — אפשר לשנות. המרווח הוא הערכה; ההתאמה הסופית אצל המרפאה בעיסוק.</p>
+  </aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+const P={L:30,W:15,D:15,SC:17,WL:6.5,F:10,H:18,C:20};
+let lidOpen=false,lidAng=0,showHand=true,spin=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+$('spin').setAttribute('aria-pressed',spin);
+
+const stage=$('stage');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){stage.insertAdjacentHTML('beforeend','<p style="padding:20px">הדפדפן לא תומך בתלת-ממד.</p>')}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+stage.prepend(renderer.domElement);renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.8;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(38,1,0.1,500);
+cam.position.set(30,8,34);
+const ctr=new THREE.OrbitControls(cam,renderer.domElement);
+ctr.target.set(0,-1,0);ctr.enableDamping=true;ctr.minDistance=18;ctr.maxDistance=110;
+let REAL=true;const amb=new THREE.AmbientLight(0x6688aa,0.9);scene.add(amb);
+const envTex=(()=>{try{const pm=new THREE.PMREMGenerator(renderer);return pm.fromScene(new THREE.RoomEnvironment(),.04).texture}catch(e){return null}})();
+const dl=new THREE.DirectionalLight(0xffffff,0.9);dl.position.set(12,30,16);dl.castShadow=true;dl.shadow.mapSize.set(1024,1024);Object.assign(dl.shadow.camera,{left:-30,right:30,top:30,bottom:-30,near:1,far:120});dl.shadow.radius=6;scene.add(dl);
+const dl2=new THREE.DirectionalLight(0x39e6ff,0.6);dl2.position.set(-15,-5,-10);scene.add(dl2);
+
+// base glow
+const grid=new THREE.PolarGridHelper(20,16,6,64,0x1f6a8a,0x123a55);grid.position.y=-24;scene.add(grid);
+const ring=new THREE.Mesh(new THREE.RingGeometry(19.5,20.5,96),new THREE.MeshBasicMaterial({color:0x39e6ff,transparent:true,opacity:.5,side:THREE.DoubleSide}));
+ring.rotation.x=-Math.PI/2;ring.position.y=-24;scene.add(ring);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(40,64),new THREE.ShadowMaterial({opacity:.18}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+
+const root=new THREE.Group();scene.add(root);
+const splint=new THREE.Group();root.add(splint);
+const handG=new THREE.Group();root.add(handG);
+const lidPivot=new THREE.Group();splint.add(lidPivot);const lidIn=new THREE.Group();lidPivot.add(lidIn);let hingeAxis=new THREE.Vector3(0,1,0);
+
+const mShell=new THREE.MeshPhongMaterial({color:0x39e6ff,emissive:0x0a3a4a,transparent:true,opacity:.22,side:THREE.DoubleSide,depthWrite:false,shininess:90});
+const mWire=new THREE.MeshBasicMaterial({color:0x7ff3ff,wireframe:true,transparent:true,opacity:.09});
+const mSleeve=new THREE.MeshPhongMaterial({color:0x1fb5d6,emissive:0x06303d,transparent:true,opacity:.38,side:THREE.DoubleSide,depthWrite:false});
+const mPts=new THREE.PointsMaterial({color:0xbff9ff,size:.18,transparent:true,opacity:.7});
+const mHinge=new THREE.MeshPhongMaterial({color:0xffa23a,emissive:0x4a2200});const mClip=new THREE.MeshPhongMaterial({color:0x38e08c,emissive:0x0b3a20});const mSeam=new THREE.LineBasicMaterial({color:0xbff9ff,transparent:true,opacity:.9});
+const mSkin=new THREE.MeshPhongMaterial({color:0xffb48a,emissive:0x3a1a0a,transparent:true,opacity:.62});
+const holeTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='rgba(40,48,56,.85)';g.beginPath();g.arc(32,32,22,0,7);g.fill();g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=5;g.beginPath();g.arc(32,32,26,0,7);g.stroke();return new THREE.CanvasTexture(c)})();
+const R_={
+ shell:new THREE.MeshPhysicalMaterial({color:0xcfe9f6,metalness:0,roughness:.06,clearcoat:1,clearcoatRoughness:.03,transparent:true,opacity:.32,side:THREE.DoubleSide,depthWrite:false,envMapIntensity:1.6}),
+ rim:new THREE.MeshPhysicalMaterial({color:0xe8f4fa,roughness:.1,clearcoat:1,transparent:true,opacity:.55,envMapIntensity:1.5}),
+ foam:new THREE.MeshStandardMaterial({color:0xf3f1ec,roughness:.95,side:THREE.DoubleSide}),
+ metal:new THREE.MeshStandardMaterial({color:0xc9cdd3,metalness:1,roughness:.32,envMapIntensity:1.2}),
+ clip:new THREE.MeshStandardMaterial({color:0x8a9097,roughness:.45,metalness:.1}),
+ skin:new THREE.MeshStandardMaterial({color:0x9a5c3a,roughness:.6}),
+ holes:new THREE.PointsMaterial({size:.75,map:holeTex,transparent:true,alphaTest:.1,depthWrite:false})
+};
+Object.values(R_).forEach(m=>m.color&&m!==R_.holes&&m.color.convertSRGBToLinear());
+const mark=new THREE.Mesh(new THREE.SphereGeometry(.45,16,12),new THREE.MeshBasicMaterial({color:0xff5a6a}));root.add(mark);
+
+function surf(nu,nv,v0,v1,fn){
+  const pos=[],idx=[];
+  for(let i=0;i<=nu;i++)for(let j=0;j<=nv;j++){const p=fn(i/nu,v0+(v1-v0)*j/nv);pos.push(p[0],p[1],p[2])}
+  for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=i*(nv+1)+j,b=a+nv+1;idx.push(a,b,a+1,b,b+1,a+1)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();return g;
+}
+// balloon profile: half-width/half-depth at height fraction u
+function prof(u,wr,full){
+  const m=.6;
+  if(u<m)return wr+(full-wr)*(1-Math.pow(1-u/m,2.6));
+  const w=Math.min(1,(u-m)/(1-m));return full*Math.pow(Math.max(0,1-Math.pow(w,2.2)),1/2.2);
+}
+let XC=0,ZC=0;const ease=u=>0;
+const per=(a,b)=>Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b)));
+const half=()=>{let a=P.WL/2;if(per(a,a)<P.SC)a=P.SC/(2*Math.PI);let lo=.3,hi=a;for(let i=0;i<40;i++){const m=(lo+hi)/2;per(a,m)<P.SC?lo=m:hi=m}const b=(lo+hi)/2;return{A:P.W/2,B:P.D/2,wa:a,wb:b,r:a}};
+function balloonFn(u,v){const h=half();const e=ease(u);return[prof(u,h.wa,h.A)*Math.cos(v)+XC*e,u*P.L,prof(u,h.wb,h.B)*Math.sin(v)+ZC*e]}
+
+function clear(g){while(g.children.length){const c=g.children.pop();if(c.geometry)c.geometry.dispose();if(c!==lidPivot)c.children&&clear(c)}}
+function addSurf(parent,geo,mat,pts){
+  if(REAL){const m=new THREE.Mesh(geo,mat===mSleeve||mat===mShell?R_.shell:mat);m.renderOrder=2;parent.add(m);return}
+  parent.add(new THREE.Mesh(geo,mat));parent.add(new THREE.Mesh(geo,mWire));if(pts)parent.add(new THREE.Points(geo,mPts))}
+function holesFor(parent,v0,v1,fn,nu,nv,u0,u1){const p=[];for(let i=0;i<=nu;i++)for(let j=1;j<nv;j++){const u=u0+(u1-u0)*i/nu+((j%2)?.5/nu*(u1-u0):0);const q=fn(u,v0+(v1-v0)*j/nv);p.push(q[0]*1.004,q[1],q[2]*1.004)}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));const pts=new THREE.Points(g,R_.holes);pts.renderOrder=3;parent.add(pts)}
+function tubeAlong(parent,pts,r,mat,closed){const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,!!closed),Math.max(24,pts.length*2),r,10,!!closed),mat);m.castShadow=true;parent.add(m);return m}
+
+function buildSplint(){
+  const wipe=g=>[...g.children].forEach(c=>{if(c===lidPivot||c===lidIn)return;g.remove(c);c.geometry&&c.geometry.dispose()});
+  wipe(splint);wipe(lidIn);
+  const h=half(),r=h.r;
+  const slvFn=(u,v)=>[h.wa*Math.cos(v),-P.F+u*P.F,h.wb*Math.sin(v)];
+  // palm-side half (fixed)
+  addSurf(splint,surf(48,28,Math.PI,2*Math.PI,balloonFn),mShell,true);
+  addSurf(splint,surf(8,28,Math.PI,2*Math.PI,slvFn),mSleeve,false);
+  // back half (opens like a capsule)
+  addSurf(lidIn,surf(48,28,0,Math.PI,balloonFn),mShell,true);
+  addSurf(lidIn,surf(8,28,0,Math.PI,slvFn),mSleeve,false);
+  // seam line where the two halves meet
+  const sp=[];
+  sp.push(new THREE.Vector3(h.wa,-P.F,0));for(let i=0;i<=60;i++){const u=i/60;sp.push(new THREE.Vector3(prof(u,h.wa,h.A),u*P.L,0))}
+  for(let i=60;i>=0;i--){const u=i/60;sp.push(new THREE.Vector3(-prof(u,h.wa,h.A),u*P.L,0))}sp.push(new THREE.Vector3(-h.wa,-P.F,0));
+  const y1=P.L*.28,y2=P.L*.7,p1=new THREE.Vector3(-prof(y1/P.L,h.wa,h.A),y1,0),p2=new THREE.Vector3(-prof(y2/P.L,h.wa,h.A),y2,0);
+  hingeAxis=p2.clone().sub(p1).normalize();
+  lidPivot.position.copy(p1);lidIn.position.copy(p1).negate();
+  const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),hingeAxis);
+  const yc=P.L*.63,clips=[[prof(yc/P.L,h.wa,h.A),yc],[h.wa,-P.F*.48]];
+  if(!REAL){
+    splint.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(sp),mSeam));
+    [p1,p2].forEach(p=>{const k=new THREE.Mesh(new THREE.CylinderGeometry(.75,.75,2.6,20),mHinge);k.position.copy(p).add(new THREE.Vector3(-.5,0,0));k.quaternion.copy(q);splint.add(k)});
+    clips.forEach(([x,y])=>{const c=new THREE.Mesh(new THREE.BoxGeometry(1.3,2.8,2.2),mClip);c.position.set(x+.5,y,0);splint.add(c)});
+    return;
+  }
+  const edge=sgn=>sp.map(p=>new THREE.Vector3(p.x*1.01,p.y,sgn*.12));
+  tubeAlong(splint,edge(-1),.2,R_.rim);tubeAlong(lidIn,edge(1),.2,R_.rim);
+  holesFor(splint,Math.PI,2*Math.PI,balloonFn,6,7,.12,.84);holesFor(lidIn,0,Math.PI,balloonFn,6,7,.12,.84);
+  holesFor(splint,Math.PI,2*Math.PI,slvFn,2,6,.2,.8);holesFor(lidIn,0,Math.PI,slvFn,2,6,.2,.8);
+  const foamFn=(u,v)=>[h.wa*.93*Math.cos(v),-P.F+u*(P.F+.6),h.wb*.9*Math.sin(v)];
+  splint.add(new THREE.Mesh(surf(6,32,Math.PI,2*Math.PI,foamFn),R_.foam));lidIn.add(new THREE.Mesh(surf(6,32,0,Math.PI,foamFn),R_.foam));
+  const rimPts=(y,s1)=>{const r=[];for(let i=0;i<64;i++){const t=i/64*Math.PI*2;r.push(new THREE.Vector3(h.wa*s1*Math.cos(t),y,h.wb*(s1+.04)*Math.sin(t)))}return r};
+  tubeAlong(splint,rimPts(-P.F,1.0),.45,R_.foam,true);
+  tubeAlong(splint,rimPts(0,1.03),.22,R_.rim,true);
+  [p1,p2].forEach(p=>{
+    const k=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,2.6,24),R_.metal);k.position.copy(p).add(new THREE.Vector3(-.45,0,0));k.quaternion.copy(q);k.castShadow=true;splint.add(k);
+    const pin=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.25,24),R_.metal);pin.position.copy(k.position).addScaledVector(hingeAxis,1.35);pin.quaternion.copy(q);splint.add(pin);
+    [[-1,splint],[1,lidIn]].forEach(([sg,par])=>{const leaf=new THREE.Mesh(new THREE.BoxGeometry(.14,2.4,1.5),R_.metal);leaf.position.set(p.x-.12,p.y,sg*.95);leaf.quaternion.copy(q);leaf.castShadow=true;par.add(leaf);
+      [-.7,.7].forEach(o=>{const sc=new THREE.Mesh(new THREE.CylinderGeometry(.17,.17,.2,12),R_.metal);sc.rotation.z=Math.PI/2;sc.position.set(p.x-.22,p.y+o,sg*1.05);par.add(sc)})});
+  });
+  clips.forEach(([x,y])=>{
+    const base=new THREE.Mesh(new THREE.BoxGeometry(.6,2.2,1.6),R_.clip);base.position.set(x+.32,y,-.9);base.castShadow=true;splint.add(base);
+    const latch=new THREE.Mesh(new THREE.BoxGeometry(.5,2.6,1.9),R_.clip);latch.position.set(x+.45,y,.55);latch.castShadow=true;lidIn.add(latch);
+    const hook=new THREE.Mesh(new THREE.BoxGeometry(.35,1.6,.5),R_.clip);hook.position.set(x+.8,y,-.25);lidIn.add(hook);
+  });
+}
+
+let handPts=[];
+function cyl(r1,r2,l){const g=new THREE.CylinderGeometry(r2,r1,l,16);g.translate(0,l/2,0);return g}
+function buildHand(){
+  clear(handG);
+  const k=P.H/17.2,th=P.C*Math.PI/180;
+  const fl=Math.max(P.F+6,16);const fa=new THREE.Mesh(cyl(3.0,2.5,fl),mSkin);fa.scale.z=.72;fa.position.y=-fl;handG.add(fa);
+  const palm=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),mSkin);palm.scale.set(4.1*k,4.9*k,1.45*k);palm.position.set(0,4.6*k,.4);handG.add(palm);
+  const F=[[-2.85,[3.0,2.3,1.9],.92],[-.95,[3.4,2.7,2.1],.98],[.95,[3.2,2.5,2.0],.94],[2.8,[2.5,1.9,1.7],.82]];
+  const chain=(base,segs,r,flex)=>{let par=base;segs.forEach((l,i)=>{const g=new THREE.Group();g.rotation.x=-flex;par.add(g);const rr=r*(1-i*.08);g.add(new THREE.Mesh(cyl(rr,rr*.92,l),mSkin));const j=new THREE.Mesh(new THREE.SphereGeometry(rr,14,10),mSkin);g.add(j);const tip=new THREE.Group();tip.position.y=l;g.add(tip);par=tip;});const e=new THREE.Mesh(new THREE.SphereGeometry(r*.75,14,10),mSkin);par.add(e)};
+  F.forEach(([x,segs,r])=>{const b=new THREE.Group();b.position.set(x*k,8.9*k,.4);handG.add(b);chain(b,segs.map(s=>s*k),r*k,th)});
+  const tb=new THREE.Group();tb.position.set(-3.2*k,2.6*k,-.4);tb.rotation.z=.15;tb.rotation.x=-.1;handG.add(tb);
+  chain(tb,[3.1,2.4,2.0].map(s=>s*k),1.0*k,th*.4);
+  root.updateMatrixWorld(true);
+  handPts=[];const v=new THREE.Vector3(),inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),m=new THREE.Matrix4();
+  handG.traverse(o=>{if(!o.isMesh)return;const a=o.geometry.attributes.position;m.multiplyMatrices(inv,o.matrixWorld);for(let i=0;i<a.count;i++){v.fromBufferAttribute(a,i).applyMatrix4(m);if(v.y>1)handPts.push([v.x,v.y,v.z])}});
+  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(const[x,y,z]of handPts)if(y>4){x0=Math.min(x0,x);x1=Math.max(x1,x);z0=Math.min(z0,z);z1=Math.max(z1,z)}
+  XC=0;ZC=0;
+}
+
+// estimated gap (cm) between hand and balloon; worst point
+function gap(){
+  const h=half();let best=1e9,bp=null,why='';
+  for(const [x,y,z] of handPts){if(y<3)continue;
+    const u=y/P.L;let d,w;
+    if(u>=1){d=-(y-P.L);w='L'}
+    else{const a=prof(u,h.wa,h.A),b=prof(u,h.wb,h.B);
+      if(a<.05||b<.05){d=-1;w='L'}else{
+      const e=ease(u),rx=(x-XC*e)/a,rz=(z-ZC*e)/b,rho=Math.hypot(rx,rz),ax=Math.abs(rx),az=Math.abs(rz);d=(1-rho)*(ax*a+az*b)/(ax+az+1e-6);
+      w=u>.78?'L':(Math.abs(rx)>Math.abs(rz)?'W':'D');}}
+    if(d<best){best=d;bp=[x,y,z];why=w}
+  }
+  return{best,bp,why};
+}
+
+function autofit(){
+  const target=2;
+  for(let i=0;i<200;i++){const g=gap();if(g.best>=target)break;
+    if(g.why==='L')P.L=Math.min(40,P.L+.25);else if(g.why==='W')P.W=Math.min(34,P.W+.25);else P.D=Math.min(34,P.D+.25);}
+  ['L','W','D'].forEach(k=>{P[k]=Math.round(P[k]*2)/2;$(k).max=Math.max(+$(k).max,P[k]);$(k).value=P[k]});
+  update(true);
+}
+
+function specRows(){
+  const h=half();
+  return[['גובה הבועה A→B',P.L],['רוחב הבועה במרכז',P.W],['עובי הבועה',P.D],['היקף הבועה בחלק הרחב',per(h.A,h.B)],['היקף החלק התחתון',P.SC],['רוחב החלק התחתון',2*h.wa],['עובי החלק התחתון (מחושב)',2*h.wb],['אורך החלק התחתון',P.F],['אורך כולל',P.L+P.F]];
+}
+function update(rebuildHand){
+  Object.keys(P).forEach(k=>$('o'+k).textContent=k==='C'?P.C+'°':(+P[k]).toFixed(1)+' ס״מ');
+  buildSplint();if(rebuildHand)buildHand();handG.visible=showHand;
+  handG.traverse(o=>{if(o.isMesh){o.material=REAL?R_.skin:mSkin;o.castShadow=REAL}});
+  scene.environment=REAL?envTex:null;amb.color.set(REAL?0xffffff:0x6688aa);amb.intensity=REAL?.35:.9;dl.intensity=REAL?1.4:.9;dl2.visible=!REAL;
+  grid.visible=ring.visible=!REAL;floor.visible=REAL;stage.classList.toggle('real',REAL);
+  const g=gap(),c=$('clr');
+  c.textContent=g.best<=0?'יש מגע!':g.best.toFixed(1)+' ס״מ';
+  c.style.color=g.best<=.3?'var(--bad)':g.best<1.5?'var(--warn)':'var(--ok)';
+  $('clrTxt').textContent=g.best<=.3?'היד נוגעת בסד — הנקודה האדומה':g.best<1.5?'מרווח קטן — כדאי להגדיל':'מרווח מינימלי — היד לא נוגעת';
+  if(g.bp){mark.position.set(...g.bp);mark.visible=showHand&&g.best<1.5}
+  $('spec').innerHTML=specRows().map(([n,v])=>`<tr><td>${n}</td><td>${v.toFixed(1)} ס״מ</td></tr>`).join('');
+}
+
+Object.keys(P).forEach(k=>{const el=$(k);el.value=P[k];el.addEventListener('input',()=>{P[k]=+el.value;update(k==='H'||k==='C'||k==='F');if(k==='F'||k==='L')grid.position.y=ring.position.y=floor.position.y=-P.F-3})});
+$('fit').addEventListener('click',()=>{autofit();frame()});
+$('open').addEventListener('click',e=>{lidOpen=!lidOpen;e.currentTarget.setAttribute('aria-pressed',lidOpen);e.currentTarget.textContent=lidOpen?'סגור מכסה':'פתח מכסה'});
+$('hand').addEventListener('click',e=>{showHand=!showHand;e.currentTarget.setAttribute('aria-pressed',showHand);update(false)});
+$('spin').addEventListener('click',e=>{spin=!spin;e.currentTarget.setAttribute('aria-pressed',spin)});
+$('mode').addEventListener('click',e=>{REAL=!REAL;e.currentTarget.setAttribute('aria-pressed',!REAL);update(false)});
+$('copy').addEventListener('click',async e=>{
+  const t='סד בועה CRPS — מידות (ס״מ)\n'+specRows().map(([n,v])=>n+': '+v.toFixed(1)).join('\n')+'\nשני חלקים נפתחים כמו קפסולה: 2 צירים בצד אחד, 2 קליפסים לסגירה בצד השני.';
+  try{await navigator.clipboard.writeText(t);e.currentTarget.textContent='הועתק ✓'}catch(_){e.currentTarget.textContent='לא ניתן להעתיק'}
+  setTimeout(()=>$('copy').textContent='העתק מידות',1800);
+});
+
+let framed=false;
+function frame(){const tot=P.F+P.L+8,d=tot/(2*Math.tan(19*Math.PI/180))/Math.min(1,cam.aspect*1.1);ctr.target.set(0,(P.L-P.F)/2-2,0);const dir=new THREE.Vector3(.65,.2,.75).normalize();cam.position.copy(ctr.target).addScaledVector(dir,d);ctr.maxDistance=d*2.5;grid.position.y=ring.position.y=floor.position.y=-P.F-3}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(!framed){frame();framed=true}}
+const ro=new ResizeObserver(resize);ro.observe(stage);
+update(true);
+let t0=performance.now();
+(function loop(t){
+  const dt=Math.min(.05,(t-t0)/1000);t0=t;
+  lidAng+=((lidOpen?-1.9:0)-lidAng)*Math.min(1,dt*5);lidPivot.quaternion.setFromAxisAngle(hingeAxis,lidAng);
+  if(spin)root.rotation.y+=dt*.35;
+  ctr.update();renderer.render(scene,cam);requestAnimationFrame(loop);
+})(t0);
+}
+</script>
+</body>
+</html>
